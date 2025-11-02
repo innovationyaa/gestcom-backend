@@ -1,0 +1,63 @@
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Base de données locale
+*.db
+*.sqlite3
+db.sqlite3
+
+# Logs
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Claude
+.claude/
+
+# Deployment files
+docker-compose.yml
+cloudbuild.yaml
+deploy.sh
+
+# Test files
+test_*.py
+test_*.sh
+
+# Media files (uploads)
+media/
+
+# Static files (seront générés dans le build)
+staticfiles/

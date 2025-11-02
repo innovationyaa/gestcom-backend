@@ -1,0 +1,41 @@
+# Gestion Com Backend - Cloud Build Configuration avec PostgreSQL
+steps:
+  # Build de l'image Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/gestion-com-backend:latest'
+      - '.'
+      - '-f'
+      - 'Dockerfile'
+
+  # Push de l'image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/gestion-com-backend:latest'
+
+  # Déploiement sur Cloud Run avec PostgreSQL
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'gestion-com-backend'
+      - '--image=europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/gestion-com-backend:latest'
+      - '--region=europe-west1'
+      - '--platform=managed'
+      - '--add-cloudsql-instances=yaaprojects:europe-west1:gestion-com-postgres'
+      - '--set-env-vars'
+      - 'ENVIRONMENT=production,PYTHONPATH=/app,DB_HOST=/cloudsql/yaaprojects:europe-west1:gestion-com-postgres,DB_PORT=5432,DB_NAME=gestioncom_db,DB_USER=postgres,DB_PASSWORD=WECAN2025@@,SECRET_KEY=django-insecure-prod-change-this-key-in-production,DJANGO_SETTINGS_MODULE=backend.settings'
+      - '--memory=512Mi'
+      - '--cpu=1'
+      - '--timeout=900'
+      - '--max-instances=10'
+      - '--allow-unauthenticated'
+
+options:
+  substitution_option: 'ALLOW_LOOSE'
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY

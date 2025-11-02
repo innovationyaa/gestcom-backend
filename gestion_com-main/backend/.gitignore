@@ -1,0 +1,26 @@
+# Fichiers Python temporaires
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Environnements virtuels
+env/
+venv/
+
+# Logs
+*.log
+
+# Fichiers sensibles
+.env
+
+# Fichiers de migration compilés
+*.pyc
+
+# Fichiers/dossiers Django générés
+/staticfiles/
+media/
+
+# Fichiers DB SQLite (même si tu n’en utilises pas, juste au cas où)
+*.sqlite3
+db.sqlite3
