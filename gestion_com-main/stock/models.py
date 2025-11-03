@@ -10,7 +10,7 @@ class Categorie(models.Model):
 
 
 class SousCategorie(models.Model):
-    nom = models.CharField(max_length=255, unique=True)  # plus de lien avec Categorie
+    nom = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.nom
@@ -44,7 +44,11 @@ class Article(models.Model):
         ('m', 'Mètre'),
         ('cm', 'Centimètre'),
     ]
-    unite_mesure = models.CharField(max_length=20, choices=UNITE_CHOICES, default='unité')
+    unite_mesure = models.CharField(
+        max_length=20,
+        choices=UNITE_CHOICES,
+        default='unité'
+    )
 
     prix_achat = models.DecimalField(max_digits=10, decimal_places=2)
     prix_vente = models.DecimalField(max_digits=10, decimal_places=2)
@@ -76,7 +80,11 @@ class MouvementStock(models.Model):
     type_mouvement = models.CharField(max_length=10, choices=TYPE_CHOICES)
     quantite = models.PositiveIntegerField()
     remarque = models.TextField(blank=True)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='mouvements')
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name='mouvements'
+    )
     date = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
