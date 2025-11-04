@@ -1,31 +1,28 @@
 from rest_framework import viewsets
-from .models import Article, MouvementStock, Categorie, SousCategorie
+from .models import Categorie, SousCategorie, Article, MouvementStock
 from .serializers import (
+    CategorieWithSousCategoriesSerializer,
+    SousCategorieSerializer,
     ArticleSerializer,
-    MouvementStockSerializer,
-    CategorieSerializer,
-    SousCategorieSerializer
+    MouvementStockSerializer
 )
 
-# ---- Articles ----
+
+class CategorieViewSet(viewsets.ModelViewSet):
+    queryset = Categorie.objects.prefetch_related('sous_categories').all()
+    serializer_class = CategorieWithSousCategoriesSerializer
+
+
+class SousCategorieViewSet(viewsets.ModelViewSet):
+    queryset = SousCategorie.objects.select_related('categorie').all()
+    serializer_class = SousCategorieSerializer
+
+
 class ArticleViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
 
 
-# ---- Mouvements ----
 class MouvementStockViewSet(viewsets.ModelViewSet):
     queryset = MouvementStock.objects.all()
     serializer_class = MouvementStockSerializer
-
-
-# ---- Catégories ----
-class CategorieViewSet(viewsets.ModelViewSet):
-    queryset = Categorie.objects.all()
-    serializer_class = CategorieSerializer
-
-
-# ---- Sous-Catégories ----
-class SousCategorieViewSet(viewsets.ModelViewSet):
-    queryset = SousCategorie.objects.all()
-    serializer_class = SousCategorieSerializer

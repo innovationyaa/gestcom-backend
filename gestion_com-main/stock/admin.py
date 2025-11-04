@@ -1,20 +1,35 @@
 from django.contrib import admin
 from django import forms
-from django.utils.html import format_html
-from .models import Article, MouvementStock, Categorie, SousCategorie
+from .models import Categorie, SousCategorie, Article, MouvementStock
 
 
-# --- Formulaire personnalisé pour filtrer les sous-catégories dynamiquement ---
+# ---------- FORMULAIRE PERSONNALISÉ ----------
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
         fields = '__all__'
 
     class Media:
-        js = ('admin/js/article_admin.js',)  # si tu veux ajouter un JS
+        # Ce fichier JS permet de filtrer les sous-catégories selon la catégorie choisie
+        js = ('admin/js/article_admin.js',)
 
 
-# --- Configuration de l’affichage de l’Article dans l’admin ---
+# ---------- ADMIN CATEGORIE ----------
+@admin.register(Categorie)
+class CategorieAdmin(admin.ModelAdmin):
+    list_display = ('nom',)
+    search_fields = ('nom',)
+
+
+# ---------- ADMIN SOUS-CATEGORIE ----------
+@admin.register(SousCategorie)
+class SousCategorieAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'categorie')
+    list_filter = ('categorie',)
+    search_fields = ('nom', 'categorie__nom')
+
+
+# ---------- ADMIN ARTICLE ----------
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     form = ArticleForm
@@ -23,38 +38,17 @@ class ArticleAdmin(admin.ModelAdmin):
         'categorie',
         'sous_categorie',
         'quantite_actuelle',
-        'unite_mesure',  # corrigé ici
-        'seuil_minimum',
         'prix_vente',
-        'alerte_seuil',
+        'fournisseur',
     )
-    search_fields = ('reference',)
-    list_filter = ('categorie', 'sous_categorie', 'unite_mesure')
-
-    def alerte_seuil(self, obj):
-        if obj.quantite_actuelle < obj.seuil_minimum:
-            return format_html('<span style="color: red; font-weight: bold;">⚠️ En rupture</span>')
-        return format_html('<span style="color: green;">✔️ OK</span>')
-    alerte_seuil.short_description = "Alerte Stock"
+    list_filter = ('categorie', 'sous_categorie', 'fournisseur')
+    search_fields = ('reference', 'description')
+    autocomplete_fields = ('categorie', 'sous_categorie', 'fournisseur')
 
 
-# --- Configuration du Mouvement de stock ---
+# ---------- ADMIN MOUVEMENT STOCK ----------
 @admin.register(MouvementStock)
 class MouvementStockAdmin(admin.ModelAdmin):
     list_display = ('type_mouvement', 'article', 'quantite', 'date')
     list_filter = ('type_mouvement', 'date')
-    search_fields = ('article__reference', 'article__sous_categorie__nom')
-
-
-# --- Admin Categorie ---
-@admin.register(Categorie)
-class CategorieAdmin(admin.ModelAdmin):
-    list_display = ('nom',)
-    search_fields = ('nom',)
-
-
-# --- Admin SousCategorie ---
-@admin.register(SousCategorie)
-class SousCategorieAdmin(admin.ModelAdmin):
-    list_display = ('nom',)  # plus de catégorie
-    search_fields = ('nom',)
+    search_fields = ('article__reference',)

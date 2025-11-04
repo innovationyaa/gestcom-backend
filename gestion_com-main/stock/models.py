@@ -11,9 +11,14 @@ class Categorie(models.Model):
 
 class SousCategorie(models.Model):
     nom = models.CharField(max_length=255, unique=True)
+    categorie = models.ForeignKey(
+        Categorie,
+        on_delete=models.CASCADE,
+        related_name='sous_categories'
+    )
 
     def __str__(self):
-        return self.nom
+        return f"{self.nom} ({self.categorie.nom})"
 
 
 class Article(models.Model):

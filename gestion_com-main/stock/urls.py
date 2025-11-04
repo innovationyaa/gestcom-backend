@@ -13,4 +13,3 @@ router.register(r'categories', CategorieViewSet, basename='categorie')
 router.register(r'sous-categories', SousCategorieViewSet, basename='souscategorie')
 
 urlpatterns = router.urls
-
