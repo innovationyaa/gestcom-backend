@@ -19,7 +19,14 @@ urlpatterns = [
     path('api/clients/', include('clients.urls')),
     path('api/facturation/', include('facturation.urls')),
     path('api/fournisseurs/', include('fournisseurs.urls')),
+    path('api/boncommandes/', include('boncommandes.urls')),
+    
+    path('api/bonlivraisons/', include('bonlivraisons.urls')),
+   
 ]
+    
+    
+
 
 # Pour servir les fichiers médias en développement
 if settings.DEBUG:

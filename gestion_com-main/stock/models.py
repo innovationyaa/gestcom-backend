@@ -82,24 +82,27 @@ class MouvementStock(models.Model):
         (SORTIE, 'Sortie'),
     ]
 
-    type_mouvement = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    quantite = models.PositiveIntegerField()
-    remarque = models.TextField(blank=True)
     article = models.ForeignKey(
         Article,
         on_delete=models.CASCADE,
         related_name='mouvements'
     )
+    type_mouvement = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    quantite = models.PositiveIntegerField()
+    remarque = models.TextField(blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        if self.pk is None:  # seulement à la création
+        is_new = self.pk is None  # vérifie si c'est une nouvelle entrée
+        super().save(*args, **kwargs)
+
+        if is_new:
+            # 🔥 Met à jour automatiquement le stock
             if self.type_mouvement == self.ENTREE:
                 self.article.quantite_actuelle += self.quantite
             elif self.type_mouvement == self.SORTIE:
                 self.article.quantite_actuelle -= self.quantite
             self.article.save()
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.type_mouvement} | {self.article.reference} | {self.quantite}"

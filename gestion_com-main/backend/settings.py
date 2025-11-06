@@ -51,6 +51,10 @@ INSTALLED_APPS = [
     'clients',
     'facturation',
     'fournisseurs',
+    'boncommandes',
+  
+    'bonlivraisons',
+   
 ]
 
 
