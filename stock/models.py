@@ -1,0 +1,95 @@
+from django.db import models
+from fournisseurs.models import Fournisseur
+
+
+class Categorie(models.Model):
+    nom = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.nom
+
+
+class SousCategorie(models.Model):
+    nom = models.CharField(max_length=255, unique=True)
+    categorie = models.ForeignKey(
+        Categorie, on_delete=models.CASCADE, related_name='sous_categories'
+    )
+
+    def __str__(self):
+        return f"{self.nom} ({self.categorie.nom})"
+
+
+# ✅ Nouvelle classe pour les unités de mesure
+class UniteMesure(models.Model):
+    nom = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.nom
+
+
+class Article(models.Model):
+    reference = models.CharField(max_length=100, unique=True)
+    categorie = models.ForeignKey(
+        Categorie, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    sous_categorie = models.ForeignKey(
+        SousCategorie, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    description = models.TextField(blank=True)
+    quantite_actuelle = models.IntegerField(default=0)
+
+    # ✅ Relation avec UniteMesure
+    unite_mesure = models.ForeignKey(
+        UniteMesure,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='articles'
+    )
+
+    prix_achat = models.DecimalField(max_digits=10, decimal_places=2)
+    prix_vente = models.DecimalField(max_digits=10, decimal_places=2)
+    seuil_minimum = models.IntegerField(default=0)
+    image = models.ImageField(upload_to='articles/', blank=True, null=True)
+
+    fournisseur = models.ForeignKey(
+        Fournisseur, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    def __str__(self):
+        fournisseur_nom = self.fournisseur.nom if self.fournisseur else "Aucun fournisseur"
+        unite = self.unite_mesure.nom if self.unite_mesure else ""
+        return f"{self.reference} ({fournisseur_nom}) {unite}"
+
+
+class MouvementStock(models.Model):
+    ENTREE = 'entrée'
+    SORTIE = 'sortie'
+    TYPE_CHOICES = [
+        (ENTREE, 'Entrée'),
+        (SORTIE, 'Sortie'),
+    ]
+
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='mouvements')
+    type_mouvement = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    quantite = models.PositiveIntegerField()
+    remarque = models.TextField(blank=True, null=True)
+    date = models.DateTimeField(auto_now_add=True)
+    bon_livraison = models.CharField(max_length=50, blank=True, null=True)
+    bon_commande = models.CharField(max_length=50, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            # 🔥 Met à jour automatiquement le stock
+            if self.type_mouvement == self.ENTREE:
+                self.article.quantite_actuelle += self.quantite
+            elif self.type_mouvement == self.SORTIE:
+                self.article.quantite_actuelle -= self.quantite
+            self.article.save()
+
+    def __str__(self):
+        bc = self.bon_commande or "N/A"
+        bl = self.bon_livraison or "N/A"
+        return f"{self.type_mouvement.upper()} | {self.article.reference} | +{self.quantite} | BL: {bl} | BC: {bc}"
